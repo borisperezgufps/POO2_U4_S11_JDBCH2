@@ -4,14 +4,19 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
+
+import org.h2.engine.User;
 
 public class H2CreateExample {
 
 	public static void main(String[] argv) throws SQLException {
 		H2CreateExample h2Example = new H2CreateExample();
-		h2Example.createTable();
+//		h2Example.createTable();
+		
+		
 		
 		String valId = JOptionPane.showInputDialog("Ingrese el ID: ");
 		String valName = JOptionPane.showInputDialog("Ingrese el Nombre: ");
@@ -20,7 +25,21 @@ public class H2CreateExample {
 		String valContra = JOptionPane.showInputDialog("Ingrese el Contrasena: ");
 		
 		h2Example.insertRecord(valId, valName, valEmail, valCountry, valContra);
-		h2Example.showRecords();
+		
+		valId = JOptionPane.showInputDialog("Ingrese el ID: ");
+		valName = JOptionPane.showInputDialog("Ingrese el Nombre: ");
+		valEmail = JOptionPane.showInputDialog("Ingrese el Email: ");
+		valCountry = JOptionPane.showInputDialog("Ingrese el Pais: ");
+		valContra = JOptionPane.showInputDialog("Ingrese el Contrasena: ");
+		
+		h2Example.insertRecord(valId, valName, valEmail, valCountry, valContra);
+		
+		// ----------------------		
+		
+		ArrayList<User> lista = h2Example.showRecordsToList();
+		for(User u : lista) {
+			// Imprimir ID: nombre - email - pais
+		}
 		
 		
 	}
@@ -49,7 +68,8 @@ public class H2CreateExample {
 		}
 	}
 
-	public void insertRecord(String id, String name, String email, String country, String contra) throws SQLException {
+	public void insertRecord(String id, String name, String email, 
+			String country, String contra) throws SQLException {
 
 		Connection conn = null;
 		Statement statementOb = null;
@@ -81,7 +101,8 @@ public class H2CreateExample {
 
 	}
 	
-	public void updateRecord(String id, String name, String email, String country, String contra) throws SQLException {
+	public void updateRecord(String id, String name, String email, 
+			String country, String contra) throws SQLException {
 
 		Connection conn = null;
 		Statement statementOb = null;
@@ -89,9 +110,10 @@ public class H2CreateExample {
 		try {
 			conn = H2JDBCUtils.getConnection();
 			statementOb = conn.createStatement();
-
+			
 			StringBuffer sb = new StringBuffer();
-			sb.append("UPDATE USERS SET name = '"+name+"', email = '"+email+"', country='"+country+"', password='"+contra+"' ");
+			sb.append("UPDATE USERS SET name = '"+name+"', ");
+			sb.append("email = '"+email+"', country='"+country+"', password='"+contra+"' ");
 			sb.append("WHERE id="+id+"");
 
 			statementOb.executeUpdate(sb.toString());
@@ -188,6 +210,56 @@ public class H2CreateExample {
 			}
 
 		}
+
+	}
+	
+	public ArrayList<User> showRecordsToList() throws SQLException {
+
+		ArrayList<User> lista = new ArrayList<User>();
+		
+		Connection conn = null;
+		Statement statementOb = null;
+
+		try {
+			conn = H2JDBCUtils.getConnection();
+			statementOb = conn.createStatement();
+
+			String sql = "SELECT id, name, email, country FROM users";
+			ResultSet rs = statementOb.executeQuery(sql);
+			
+			while(rs.next()) { 
+	            // Retrieve by column name 
+	            int id  = rs.getInt("id"); 
+	            String name = rs.getString("name"); 
+	            String email = rs.getString("email"); 
+	            String country = rs.getString("country");  
+	            
+	            // User u = new User();
+	            // u.setId(id);
+	            // u.setName(name);
+	            // ...
+	            
+	            // lista.add(u);
+	         } 
+			
+			rs.close();
+
+		} catch (SQLException e) {
+			// print SQL exception information
+			e.printStackTrace();
+		} finally {
+			// Close the connection
+			try {
+				statementOb.close();
+				conn.close();
+			} catch (SQLException e) {
+				// print SQL exception information
+				e.printStackTrace();
+			}
+
+		}
+		
+		return lista;
 
 	}
 }
